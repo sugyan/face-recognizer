@@ -1,0 +1,13 @@
+AllCops:
+  RunRailsCops: true
+  Exclude:
+    - 'bin/*'
+    - 'db/schema.rb'
+    - 'test/test_helper.rb'
+    - 'vendor/bundle/**/*'
+
+Metrics/LineLength:
+  Max: 120
+
+Style/Documentation:
+  Enabled: false
