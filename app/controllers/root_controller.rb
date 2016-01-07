@@ -15,7 +15,9 @@ class RootController < ApplicationController
       logger.debug(face)
       img = face_image(image, face, FACE_SIZE)
       face[:recognize] = classify_face(img)
+      img.destroy!
     end
+    image.destroy!
     render json: { faces: faces }
   end
 end
