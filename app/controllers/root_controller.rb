@@ -16,6 +16,6 @@ class RootController < ApplicationController
       img = face_image(image, face, FACE_SIZE)
       face[:recognize] = classify_face(img)
     end
-    render json: faces
+    render json: { faces: faces }
   end
 end
