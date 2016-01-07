@@ -1,13 +1,11 @@
 require 'rvg/rvg'
 
 module Image
-  FACE_SIZE = 32
-
-  def faces(image)
+  def detect_faces(image)
     url = URI(ENV['GOOGLE_CLOUD_VISION_API_ENDPOINT'])
     res = HTTPClient.new.post(url, generate_json(image), 'Content-Type' => 'application/json')
-    result = JSON.parse(res.body)
-    result['responses'][0]['faceAnnotations'].map do |annotation|
+    results = JSON.parse(res.body)['responses'][0]['faceAnnotations']
+    (results || []).map do |annotation|
       {
         bounding: annotation['boundingPoly']['vertices'],
         angle: {
@@ -19,18 +17,12 @@ module Image
     end
   end
 
-  def recognized_faces(image)
-    faces(image).each do |face|
-      img = face_image(image, face, FACE_SIZE)
-      img.format = 'JPG'
-      input = 'data:image/jpeg;base64,' + Base64.strict_encode64(img.to_blob)
-      res = HTTPClient.new.post(ENV['CLASSIFIER_API_ENDPOINT'], image: input)
-      face[:recognize] = JSON.parse(res.body)
-      img.destroy!
-    end
+  def classify_face(image)
+    image.format = 'JPG'
+    input = 'data:image/jpeg;base64,' + Base64.strict_encode64(image.to_blob)
+    res = HTTPClient.new.post(ENV['CLASSIFIER_API_ENDPOINT'], image: input)
+    JSON.parse(res.body)['result']
   end
-
-  private
 
   def face_image(image, face, size)
     x = face[:bounding].map { |v| v['x'] }
@@ -46,6 +38,8 @@ module Image
     end
     rvg.draw
   end
+
+  private
 
   def generate_json(image)
     image.format = 'JPG'
