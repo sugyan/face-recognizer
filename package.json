@@ -2,6 +2,7 @@
   "name": "face-recognizer",
   "version": "1.0.0",
   "description": "== README",
+  "repository": "https://github.com/sugyan/face-recognizer",
   "main": "",
   "directories": {
     "test": "test"

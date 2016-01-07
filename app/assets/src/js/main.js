@@ -9,6 +9,7 @@ class Main {
         // image load
         this.image = new window.Image();
         this.image.onload = () => {
+            // draw to canvas
             const h = this.image.height;
             const w = this.image.width;
             const scale = Math.max(w / this.size, h / this.size);
@@ -19,7 +20,17 @@ class Main {
                 (this.size - w / scale) / 2, (this.size - h / scale) / 2,
                 w / scale, h / scale
             );
-            this.getSmallImageURL(this.canvas.toDataURL(), 32, this.postImage);
+            // post to api
+            $.ajax({
+                url: '/api',
+                method: 'POST',
+                data: {
+                    image: this.image.src
+                },
+                success: (result) => {
+                    window.console.log(JSON.stringify(result));
+                }
+            });
         };
         this.image.onerror = () => {
             this.ctx.fillStyle = '#000';
@@ -42,7 +53,7 @@ class Main {
             }
         });
     }
-    setFile(file) {
+    enableSelectFile(file) {
         file.addEventListener('change', (e) => {
             const reader = new window.FileReader();
             if (e.target.files.length > 0) {
@@ -53,33 +64,9 @@ class Main {
             }
         });
     }
-    getSmallImageURL(src, size, callback) {
-        const resized = document.createElement('canvas');
-        resized.width = size;
-        resized.height = size;
-
-        const image = new window.Image();
-        image.onload = () => {
-            resized.getContext('2d').drawImage(image, 0, 0, size, size);
-            callback(resized.toDataURL());
-        };
-        image.src = src;
-    }
-    postImage(data) {
-        $.ajax({
-            url: '/recognize',
-            method: 'POST',
-            data: {
-                image: data
-            },
-            success: (result) => {
-                window.console.log(JSON.stringify(result));
-            }
-        });
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const main = new Main(document.getElementById('canvas'));
-    main.setFile(document.getElementById('file'));
+    main.enableSelectFile(document.getElementById('file'));
 });

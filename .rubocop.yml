@@ -9,5 +9,17 @@ AllCops:
 Metrics/LineLength:
   Max: 120
 
+Metrics/MethodLength:
+  Max: 20
+
+Metrics/AbcSize:
+  Max: 50
+
 Style/Documentation:
   Enabled: false
+
+Style/TrailingComma:
+  Enabled: false
+
+Style/MultilineOperationIndentation:
+  EnforcedStyle: indented
