@@ -8,10 +8,11 @@ class RootController < ApplicationController
 
   def api
     data = params.require(:image)
-    image = Magick::Image.from_blob(Base64.decode64(data.split(',')[1])).first
-    faces = detect_faces(image)
+    image = Magick::Image.from_blob(Base64.decode64(data.split(',')[1])).first.auto_orient
+    faces = detect_faces(image).select do |face|
+      face[:bounding].all? { |v| v['x'] && v['y'] }
+    end
     faces.each do |face|
-      next unless face[:bounding].all? { |v| v['x'] && v['y'] }
       logger.debug(face)
       img = face_image(image, face, FACE_SIZE)
       face[:recognize] = classify_face(img)
