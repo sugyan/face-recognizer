@@ -17,7 +17,6 @@ class Main {
             this.offset_x = (this.size - w / this.scale) / 2.0;
             this.offset_y = (this.size - h / this.scale) / 2.0;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            window.console.log(this.orientation);
             switch (this.orientation || 1) {
             case 1:
                 this.ctx.transform(1, 0, 0, 1, 0, 0);
@@ -46,7 +45,7 @@ class Main {
             }
             this.ctx.drawImage(this.image, this.offset_x, this.offset_y, w / this.scale, h / this.scale);
             this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-            if (this.orientation || 1 > 4) {
+            if ((this.orientation || 1) > 4) {
                 [this.offset_x, this.offset_y] = [this.offset_y, this.offset_x];
             }
             // post to api
@@ -105,11 +104,11 @@ class Main {
         reader.readAsDataURL(file);
     }
     drawFaceRect(faces) {
-        const rotete = (target, center, rad) => {
-            return [
-                + Math.cos(rad) * target.x + Math.sin(rad) * target.y - center.x * Math.cos(rad) - center.y * Math.sin(rad) + center.x,
-                - Math.sin(rad) * target.x + Math.cos(rad) * target.y + center.x * Math.sin(rad) - center.y * Math.cos(rad) + center.y
-            ];
+        const rotate = (target, center, rad) => {
+            return {
+                x:   Math.cos(rad) * target.x + Math.sin(rad) * target.y - center.x * Math.cos(rad) - center.y * Math.sin(rad) + center.x,
+                y: - Math.sin(rad) * target.x + Math.cos(rad) * target.y + center.x * Math.sin(rad) - center.y * Math.cos(rad) + center.y
+            };
         };
         faces.forEach((face) => {
             const v = face.bounding.map((e) => {
@@ -123,11 +122,12 @@ class Main {
                 y: (v[0].y + v[2].y) / 2.0
             };
             const radian = face.angle.roll * Math.PI / 180.0;
+            const p = v.map((e) => rotate(e, center, -radian));
             this.ctx.beginPath();
-            this.ctx.moveTo(...rotete(v[0], center, -radian));
-            this.ctx.lineTo(...rotete(v[1], center, -radian));
-            this.ctx.lineTo(...rotete(v[2], center, -radian));
-            this.ctx.lineTo(...rotete(v[3], center, -radian));
+            this.ctx.moveTo(p[0].x, p[0].y);
+            this.ctx.lineTo(p[1].x, p[1].y);
+            this.ctx.lineTo(p[2].x, p[2].y);
+            this.ctx.lineTo(p[3].x, p[3].y);
             this.ctx.closePath();
             this.ctx.stroke();
         });
