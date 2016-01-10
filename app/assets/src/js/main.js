@@ -35,6 +35,7 @@ class Main {
         this.scale = Math.max(w / this.size, h / this.size);
         this.offset_x = (this.size - w / this.scale) / 2.0;
         this.offset_y = (this.size - h / this.scale) / 2.0;
+        this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.size, this.size);
         // rotate image
         EXIF.getData(this.image, () => {
@@ -90,6 +91,7 @@ class Main {
             this.image = new window.Image();
             this.image.onload = this.onImageLoad.bind(this);
             this.image.onerror = () => {
+                this.ctx.fillStyle = '#000';
                 this.ctx.fillRect(0, 0, this.size, this.size);
                 alert('Failed to load image.');
             };
@@ -105,6 +107,8 @@ class Main {
             };
         };
         faces.forEach((face) => {
+            // recognized result
+            const recognized = face.recognize.sort((a, b) => b[1] - a[1])[0];
             const v = face.bounding.map((e) => {
                 return {
                     x: e.x / this.scale + this.offset_x,
@@ -117,6 +121,8 @@ class Main {
             };
             const radian = face.angle.roll * Math.PI / 180.0;
             const p = v.map((e) => rotate(e, center, -radian));
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeStyle = '#808080';
             this.ctx.beginPath();
             this.ctx.moveTo(p[0].x, p[0].y);
             this.ctx.lineTo(p[1].x, p[1].y);
@@ -124,15 +130,23 @@ class Main {
             this.ctx.lineTo(p[3].x, p[3].y);
             this.ctx.closePath();
             this.ctx.stroke();
+            // result
+            this.ctx.font = '15px sans-serif';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeText(recognized[0], p[3].x, p[3].y);
+            this.ctx.fillStyle = '#8BE';
+            this.ctx.fillText(recognized[0], p[3].x, p[3].y);
         });
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const main = new Main(
-        document.getElementById('canvas'),
-        document.getElementById('loading'),
-        document.getElementById('response')
-    );
-    main.enableSelectFile(document.getElementById('file'));
+    if (window.location.pathname === '/') {
+        const main = new Main(
+            document.getElementById('canvas'),
+            document.getElementById('loading'),
+            document.getElementById('response')
+        );
+        main.enableSelectFile(document.getElementById('file'));
+    }
 });

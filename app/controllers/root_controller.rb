@@ -12,10 +12,14 @@ class RootController < ApplicationController
     faces = detect_faces(image).select do |face|
       face[:bounding].all? { |v| v['x'] && v['y'] }
     end
+    labels = Label.all.index_by(&:index_number)
     faces.each do |face|
       logger.debug(face)
       img = face_image(image, face, FACE_SIZE)
-      face[:recognize] = classify_face(img)
+      classified = classify_face(img)
+      face[:recognize] = classified.map.with_index do |e, i|
+        [labels[i] ? labels[i].name : i, e * 100.0]
+      end
       img.destroy!
     end
     image.destroy!

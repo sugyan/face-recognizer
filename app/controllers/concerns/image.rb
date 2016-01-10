@@ -7,7 +7,7 @@ module Image
     results = JSON.parse(res.body)['responses'][0]['faceAnnotations']
     (results || []).map do |annotation|
       {
-        bounding: annotation['boundingPoly']['vertices'],
+        bounding: annotation['fdBoundingPoly']['vertices'],
         angle: {
           roll: annotation['rollAngle'],
           yaw: annotation['panAngle'],
