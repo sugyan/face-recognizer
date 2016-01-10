@@ -1,9 +1,17 @@
 /* global $, EXIF */
 class Main {
-    constructor(canvas) {
-        this.size = Math.min($(window).width() - 30, 512);
+    constructor(canvas, loading) {
         this.canvas = canvas;
+        this.loading = loading;
+        this.size = Math.min($(window).width() - 30, 512);
         this.canvas.width = this.canvas.height = this.size;
+        $(this.loading)
+            .width(this.size + 1)
+            .height(this.size + 1);
+        $(this.loading).children().first().css({
+            top: (this.size - 200) / 2.0,
+            left: (this.size - 200) / 2.0
+        });
         this.ctx = canvas.getContext('2d');
         this.ctx.fillStyle = '#000';
 
@@ -16,31 +24,31 @@ class Main {
             this.scale = Math.max(w / this.size, h / this.size);
             this.offset_x = (this.size - w / this.scale) / 2.0;
             this.offset_y = (this.size - h / this.scale) / 2.0;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillRect(0, 0, this.size, this.size);
             switch (this.orientation || 1) {
             case 1:
                 this.ctx.transform(1, 0, 0, 1, 0, 0);
                 break;
             case 2:
-                this.ctx.transform(-1, 0, 0, 1, this.canvas.width, 0);
+                this.ctx.transform(-1, 0, 0, 1, this.size, 0);
                 break;
             case 3:
-                this.ctx.transform(-1, 0, 0, -1, this.canvas.width, this.canvas.height);
+                this.ctx.transform(-1, 0, 0, -1, this.size, this.size);
                 break;
             case 4:
-                this.ctx.transform(1, 0, 0, -1, 0, this.canvas.height);
+                this.ctx.transform(1, 0, 0, -1, 0, this.size);
                 break;
             case 5:
                 this.ctx.transform(0, 1, 1, 0, 0, 0);
                 break;
             case 6:
-                this.ctx.transform(0, 1, -1, 0, this.canvas.height, 0);
+                this.ctx.transform(0, 1, -1, 0, this.size, 0);
                 break;
             case 7:
-                this.ctx.transform(0, -1, -1, 0, this.canvas.height, this.canvas.width);
+                this.ctx.transform(0, -1, -1, 0, this.size, this.size);
                 break;
             case 8:
-                this.ctx.transform(0, -1, 1, 0, 0, this.canvas.width);
+                this.ctx.transform(0, -1, 1, 0, 0, this.size);
                 break;
             }
             this.ctx.drawImage(this.image, this.offset_x, this.offset_y, w / this.scale, h / this.scale);
@@ -50,6 +58,7 @@ class Main {
             }
             // post to api
             const key = this.key = Math.floor(Math.random() * 0xFFFFFFFF).toString(16);
+            $(this.loading).show();
             $.ajax({
                 url: '/api',
                 method: 'POST',
@@ -60,13 +69,14 @@ class Main {
                     if (this.key !== key) {
                         return;
                     }
+                    $(this.loading).hide();
                     $('#response').text(JSON.stringify(result, null, '  '));
                     this.drawFaceRect(result.faces);
                 }
             });
         };
         this.image.onerror = () => {
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillRect(0, 0, this.size, this.size);
             alert('Failed to load image.');
         };
         // drag and drop
@@ -135,6 +145,9 @@ class Main {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const main = new Main(document.getElementById('canvas'));
+    const main = new Main(
+        document.getElementById('canvas'),
+        document.getElementById('loading')
+    );
     main.enableSelectFile(document.getElementById('file'));
 });
