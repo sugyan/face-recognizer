@@ -25,34 +25,19 @@ class Main {
             this.offset_x = (this.size - w / this.scale) / 2.0;
             this.offset_y = (this.size - h / this.scale) / 2.0;
             this.ctx.fillRect(0, 0, this.size, this.size);
-            switch (this.orientation || 1) {
-            case 1:
-                this.ctx.transform(1, 0, 0, 1, 0, 0);
-                break;
-            case 2:
-                this.ctx.transform(-1, 0, 0, 1, this.size, 0);
-                break;
-            case 3:
-                this.ctx.transform(-1, 0, 0, -1, this.size, this.size);
-                break;
-            case 4:
-                this.ctx.transform(1, 0, 0, -1, 0, this.size);
-                break;
-            case 5:
-                this.ctx.transform(0, 1, 1, 0, 0, 0);
-                break;
-            case 6:
-                this.ctx.transform(0, 1, -1, 0, this.size, 0);
-                break;
-            case 7:
-                this.ctx.transform(0, -1, -1, 0, this.size, this.size);
-                break;
-            case 8:
-                this.ctx.transform(0, -1, 1, 0, 0, this.size);
-                break;
-            }
+            const transform = {
+                1: [1, 0, 0, 1, 0, 0],
+                2: [-1, 0, 0, 1, this.size, 0],
+                3: [-1, 0, 0, -1, this.size, this.size],
+                4: [1, 0, 0, -1, 0, this.size],
+                5: [0, 1, 1, 0, 0, 0],
+                6: [0, 1, -1, 0, this.size, 0],
+                7: [0, -1, -1, 0, this.size, this.size],
+                8: [0, -1, 1, 0, 0, this.size]
+            };
+            this.ctx.transform(...transform[this.orientation || 1]);
             this.ctx.drawImage(this.image, this.offset_x, this.offset_y, w / this.scale, h / this.scale);
-            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            this.ctx.setTransform(...transform[1]);
             if ((this.orientation || 1) > 4) {
                 [this.offset_x, this.offset_y] = [this.offset_y, this.offset_x];
             }
