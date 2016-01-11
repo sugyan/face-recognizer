@@ -74,6 +74,11 @@ class Main {
                 $(this.loading).hide();
                 $(this.response).text(JSON.stringify(result, null, '  '));
                 this.drawFaceRect(result.faces);
+            },
+            error: (_, e) => {
+                window.console.error(e);
+                $(this.loading).hide();
+                $(this.response).text('error');
             }
         });
     }
@@ -131,10 +136,11 @@ class Main {
             this.ctx.closePath();
             this.ctx.stroke();
             // result
+            this.ctx.textBaseline = 'top';
             this.ctx.font = '15px sans-serif';
             this.ctx.lineWidth = 1;
             this.ctx.strokeText(recognized[0], p[3].x, p[3].y);
-            this.ctx.fillStyle = '#8BE';
+            this.ctx.fillStyle = '#3AE';
             this.ctx.fillText(recognized[0], p[3].x, p[3].y);
         });
     }

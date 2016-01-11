@@ -17,11 +17,12 @@ module Image
     end
   end
 
-  def classify_face(image)
-    image.format = 'JPG'
-    input = 'data:image/jpeg;base64,' + Base64.strict_encode64(image.to_blob)
-    res = HTTPClient.new.post(ENV['CLASSIFIER_API_ENDPOINT'], image: input)
-    JSON.parse(res.body)['result']
+  def classify_faces(faces)
+    images = faces.map do |data|
+      ['images', data]
+    end
+    res = HTTPClient.new.post(ENV['CLASSIFIER_API_ENDPOINT'], images)
+    JSON.parse(res.body)['results']
   end
 
   def face_image(image, face, size)
