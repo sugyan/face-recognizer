@@ -49,3 +49,4 @@ gem 'puma', '~> 2.15'
 gem 'rails_12factor', group: :production
 gem 'rmagick', '~> 2.15'
 gem 'httpclient', '~> 2.7'
+gem 'react-rails', '~> 1.5'

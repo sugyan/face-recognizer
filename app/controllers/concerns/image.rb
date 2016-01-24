@@ -33,7 +33,7 @@ module Image
       canvas
         .image(image)
         .translate(size * 0.5, size * 0.5)
-        .scale(scale)
+        .scale(scale / 1.2)
         .rotate(-face[:angle][:roll])
         .translate(-(x.min + x.max) * 0.5, -(y.min + y.max) * 0.5)
     end

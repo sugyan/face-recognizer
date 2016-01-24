@@ -1,5 +1,5 @@
 class RootController < ApplicationController
-  FACE_SIZE = 32
+  FACE_SIZE = 112
 
   include Image
 
