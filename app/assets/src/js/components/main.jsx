@@ -1,20 +1,33 @@
 /* global $, React, EXIF */
 
 class Main extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            faces: []
+        };
+    }
+    updateFaces(faces) {
+        this.setState({
+            faces: faces
+        });
+    }
     render() {
         return (
             <div className="row">
               <div className="col-xs-12 col-sm-9 col-md-8 col-lg-6">
-                <ImageLoader/>
+                <ImageLoader onFacesUpdated={this.updateFaces.bind(this)}/>
               </div>
-              <div className="col-xs-12 col-sm-9 col-md-4 col-lg-6"></div>
+              <div className="col-xs-12 col-sm-9 col-md-4 col-lg-6">
+                <ResultList faces={this.state.faces}/>
+              </div>
             </div>
         );
     }
 }
 
 class ImageLoader extends React.Component {
-    onImageLoad(image) {
+    drawImage(image) {
         const ctx = this.refs.canvas.getContext('2d');
         const h = image.height;
         const w = image.width;
@@ -61,6 +74,20 @@ class ImageLoader extends React.Component {
                         y: - Math.sin(rad) * target.x + Math.cos(rad) * target.y + center.x * Math.sin(rad) - center.y * Math.cos(rad) + center.y
                     };
                 };
+                const face_url = (face) => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const radian = face.angle.roll * Math.PI / 180.0;
+                    const s = 96 / Math.max(Math.abs(face.bounding[0].x - face.bounding[2].x), Math.abs(face.bounding[0].y - face.bounding[2].y));
+                    canvas.width = canvas.height = 112;
+                    ctx.translate(56, 56);
+                    ctx.scale(s, s);
+                    ctx.rotate(-radian);
+                    ctx.translate(-(face.bounding[0].x + face.bounding[2].x) / 2.0, -(face.bounding[0].y + face.bounding[2].y) / 2.0);
+                    ctx.drawImage(image, 0, 0);
+                    return canvas.toDataURL();
+                }
+                const faces = [];
                 result.faces.forEach((face) => {
                     const v = face.bounding.map((e) => {
                         return {
@@ -83,7 +110,13 @@ class ImageLoader extends React.Component {
                     ctx.lineTo(p[3].x, p[3].y);
                     ctx.closePath();
                     ctx.stroke();
+
+                    faces.push({
+                        url: face_url(face),
+                        result: face.recognize
+                    });
                 });
+                this.props.onFacesUpdated(faces);
             },
             error: (_, e) => {
                 window.console.error(e);
@@ -94,7 +127,7 @@ class ImageLoader extends React.Component {
         const reader = new window.FileReader();
         reader.onload = (e) => {
             const image = new window.Image();
-            image.onload = () => this.onImageLoad(image);
+            image.onload = this.drawImage.bind(this, image);
             image.onerror = () => {
                 const ctx = this.refs.canvas.getContext('2d');
                 ctx.fillStyle = '#000';
@@ -131,6 +164,22 @@ class ImageLoader extends React.Component {
               <p>drag and drop or select image.</p>
               <input ref="file" type="file" accept="image/*" id="file"/>
             </div>
+        );
+    }
+}
+
+class ResultList extends React.Component {
+    render() {
+        const faces = this.props.faces.map((e, i) => {
+            return (
+                <div key={i}>
+                  <img src={e.url}/>
+                  {JSON.stringify(e.result)}
+                </div>
+            );
+        });
+        return (
+            <div>{faces}</div>
         );
     }
 }
