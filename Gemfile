@@ -50,3 +50,4 @@ gem 'rails_12factor', group: :production
 gem 'rmagick', '~> 2.15'
 gem 'httpclient', '~> 2.7'
 gem 'react-rails', '~> 1.5'
+gem 'dalli', '~> 2.7'

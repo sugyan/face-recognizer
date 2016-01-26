@@ -15,7 +15,7 @@ class RootController < ApplicationController
       face[:bounding].all? { |v| v['x'] && v['y'] }
     end
     # create face images
-    faces = detected.map.with_index do |face, i|
+    faces = detected.map do |face|
       img = face_image(image, face, FACE_SIZE)
       img.format = 'JPG'
       b64 = Base64.strict_encode64(img.to_blob)
@@ -28,10 +28,16 @@ class RootController < ApplicationController
       r.map { |v| format('%.3f', v * 100.0).to_f }
     end
     # label name and response
-    labels = Label.all.index_by(&:index_number)
+    labels = Rails.cache.fetch('labels') do
+      data = JSON.parse(HTTPClient.new.get_content(ENV['LABEL_API_ENDPOINT'])).map do |e|
+        n = e.delete('index_number')
+        n ? [n, e] : []
+      end
+      Hash[*data.flatten]
+    end
     detected.each.with_index do |face, i|
       face[:recognize] = classified[i].map.with_index do |e, j|
-        [labels[j] ? labels[j].name : j, e]
+        [labels[j] ? labels[j]['name'] : j, e]
       end
     end
     render json: { faces: detected }
