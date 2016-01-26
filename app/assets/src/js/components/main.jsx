@@ -113,7 +113,7 @@ class ImageLoader extends React.Component {
 
                     faces.push({
                         url: face_url(face),
-                        result: face.recognize
+                        results: face.recognize
                     });
                 });
                 this.props.onFacesUpdated(faces);
@@ -171,10 +171,15 @@ class ImageLoader extends React.Component {
 class ResultList extends React.Component {
     render() {
         const faces = this.props.faces.map((e, i) => {
+            const results = e.results.map((r, j) => {
+                return (
+                    <p key={`${i}-${j}`}>{`${r[0]}: ${r[1]}`}</p>
+                );
+            })
             return (
                 <div key={i}>
                   <img src={e.url}/>
-                  {JSON.stringify(e.result)}
+                  {results}
                 </div>
             );
         });
