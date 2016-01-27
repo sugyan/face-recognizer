@@ -7,25 +7,39 @@ class Main extends React.Component {
             faces: []
         };
     }
-    updateFaces(faces) {
+    updateFaces(faces, message) {
         this.setState({
-            faces: faces
+            faces: faces,
+            message: message
         });
+    }
+    changeLoadingState(loading) {
+        if (loading) {
+            this.setState({
+                faces: [],
+                message: 'loading...',
+                loading: true
+            });
+        } else {
+            this.setState({
+                loading: false
+            });
+        }
     }
     componentDidMount() {
         this.setState({
             loaderSize: this.refs.loader.size + 1
-        })
+        });
     }
     render() {
         return (
             <div className="row">
               <div className="col-xs-12 col-sm-9 col-md-8 col-lg-6">
-                <ImageLoader ref="loader" updateFaces={this.updateFaces.bind(this)}/>
-                <Loading display={false} size={this.state.loaderSize}/>
+                <ImageLoader ref="loader" updateFaces={this.updateFaces.bind(this)} changeLoadingState={this.changeLoadingState.bind(this)}/>
+                <Loading display={this.state.loading} size={this.state.loaderSize}/>
               </div>
               <div className="col-xs-12 col-sm-9 col-md-4 col-lg-6">
-                <ResultList faces={this.state.faces}/>
+                <ResultList faces={this.state.faces} message={this.state.message}/>
               </div>
             </div>
         );
@@ -64,6 +78,7 @@ class ImageLoader extends React.Component {
         });
         /* post to api */
         const req = this.req = Math.floor(Math.random() * 0xFFFFFFFF);
+        this.props.changeLoadingState(true);
         $.ajax({
             url: '/api',
             method: 'POST',
@@ -74,6 +89,7 @@ class ImageLoader extends React.Component {
                 if (this.req !== req) {
                     return;
                 }
+                this.props.changeLoadingState(false);
                 const rotate = (target, center, rad) => {
                     return {
                         x:   Math.cos(rad) * target.x + Math.sin(rad) * target.y - center.x * Math.cos(rad) - center.y * Math.sin(rad) + center.x,
@@ -92,7 +108,7 @@ class ImageLoader extends React.Component {
                     ctx.translate(-(face.bounding[0].x + face.bounding[2].x) / 2.0, -(face.bounding[0].y + face.bounding[2].y) / 2.0);
                     ctx.drawImage(image, 0, 0);
                     return canvas.toDataURL();
-                }
+                };
                 const faces = [];
                 result.faces.forEach((face) => {
                     const v = face.bounding.map((e) => {
@@ -122,7 +138,7 @@ class ImageLoader extends React.Component {
                         results: face.recognize.sort((a, b) => b[1] - a[1])
                     });
                 });
-                this.props.updateFaces(faces);
+                this.props.updateFaces(faces, result.message);
             },
             error: (_, e) => {
                 window.console.error(e);
@@ -178,10 +194,12 @@ class ResultList extends React.Component {
     render() {
         const faces = this.props.faces.map((e, i) => {
             const results = e.results.map((r, j) => {
+                const text = `${r[0]}: ${r[1]}`;
+                const li = j == 0 ? <strong>{text}</strong> : <span>{text}</span>;
                 return (
-                    <li key={`${i}-${j}`}>{`${r[0]}: ${r[1]}`}</li>
+                    <li key={`${i}-${j}`}>{li}</li>
                 );
-            })
+            });
             return (
                 <tr key={i}>
                   <td>
@@ -196,9 +214,12 @@ class ResultList extends React.Component {
             );
         });
         return (
-            <table className="table table-hover">
-              <tbody>{faces}</tbody>
-            </table>
+            <div>
+              <p>{this.props.message}</p>
+              <table className="table table-hover">
+                <tbody>{faces}</tbody>
+              </table>
+            </div>
         );
     }
 }

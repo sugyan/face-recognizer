@@ -40,6 +40,6 @@ class RootController < ApplicationController
         [labels[j] ? labels[j]['name'] : j, e]
       end
     end
-    render json: { faces: detected }
+    render json: { faces: detected, message: format('detected %d faces.', detected.size) }
   end
 end
