@@ -12,11 +12,17 @@ class Main extends React.Component {
             faces: faces
         });
     }
+    componentDidMount() {
+        this.setState({
+            loaderSize: this.refs.loader.size + 1
+        })
+    }
     render() {
         return (
             <div className="row">
               <div className="col-xs-12 col-sm-9 col-md-8 col-lg-6">
-                <ImageLoader onFacesUpdated={this.updateFaces.bind(this)}/>
+                <ImageLoader ref="loader" updateFaces={this.updateFaces.bind(this)}/>
+                <Loading display={false} size={this.state.loaderSize}/>
               </div>
               <div className="col-xs-12 col-sm-9 col-md-4 col-lg-6">
                 <ResultList faces={this.state.faces}/>
@@ -113,10 +119,10 @@ class ImageLoader extends React.Component {
 
                     faces.push({
                         url: face_url(face),
-                        results: face.recognize
+                        results: face.recognize.sort((a, b) => b[1] - a[1])
                     });
                 });
-                this.props.onFacesUpdated(faces);
+                this.props.updateFaces(faces);
             },
             error: (_, e) => {
                 window.console.error(e);
@@ -173,18 +179,50 @@ class ResultList extends React.Component {
         const faces = this.props.faces.map((e, i) => {
             const results = e.results.map((r, j) => {
                 return (
-                    <p key={`${i}-${j}`}>{`${r[0]}: ${r[1]}`}</p>
+                    <li key={`${i}-${j}`}>{`${r[0]}: ${r[1]}`}</li>
                 );
             })
             return (
-                <div key={i}>
-                  <img src={e.url}/>
-                  {results}
-                </div>
+                <tr key={i}>
+                  <td>
+                    <img src={e.url}/>
+                  </td>
+                  <td style={{width: '100%'}}>
+                    <ul className="list-unstyled">
+                      {results}
+                    </ul>
+                  </td>
+                </tr>
             );
         });
         return (
-            <div>{faces}</div>
+            <table className="table table-hover">
+              <tbody>{faces}</tbody>
+            </table>
+        );
+    }
+}
+
+class Loading extends React.Component {
+    render() {
+        const size = this.props.size || 0;
+        return (
+            <div ref="loading" style={{position: 'absolute', top: '0px', backgroundColor: 'gray', opacity: '0.75', width: size, height: size, display: this.props.display ? 'block' : 'none'}}>
+              <div className='uil-loading-css' style={{transform: 'scale(1)', top: (size - 200) / 2.0, left: (size - 200) / 2.0}}>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(0deg) translate(0,-60px)',   transform: 'rotate(0deg) translate(0,-60px)',   borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(30deg) translate(0,-60px)',  transform: 'rotate(30deg) translate(0,-60px)',  borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(60deg) translate(0,-60px)',  transform: 'rotate(60deg) translate(0,-60px)',  borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(90deg) translate(0,-60px)',  transform: 'rotate(90deg) translate(0,-60px)',  borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(120deg) translate(0,-60px)', transform: 'rotate(120deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(150deg) translate(0,-60px)', transform: 'rotate(150deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(180deg) translate(0,-60px)', transform: 'rotate(180deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(210deg) translate(0,-60px)', transform: 'rotate(210deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(240deg) translate(0,-60px)', transform: 'rotate(240deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(270deg) translate(0,-60px)', transform: 'rotate(270deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(300deg) translate(0,-60px)', transform: 'rotate(300deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+                <div style={{top: '80px', left: '93px', width: '14px', height: '40px', background: '#cec9c9', WebkitTransform: 'rotate(330deg) translate(0,-60px)', transform: 'rotate(330deg) translate(0,-60px)', borderRadius: '10px', position: 'absolute'}}></div>
+              </div>
+            </div>
         );
     }
 }
