@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   root 'root#index'
 
-  resources :labels
   post 'api' => 'root#api'
 
   # The priority is based upon order of creation: first created -> highest priority.
