@@ -68,11 +68,11 @@ class ImageLoader extends React.Component {
                 7: [0, -1, -1, 0, this.size, this.size],
                 8: [0, -1, 1, 0, 0, this.size]
             };
-            const orientation = EXIF.getTag(image, 'Orientation');
-            ctx.transform(...transforms[orientation || 1]);
+            this.orientation = EXIF.getTag(image, 'Orientation');
+            ctx.transform(...transforms[this.orientation || 1]);
             ctx.drawImage(image, offset_x, offset_y, w / scale, h / scale);
             ctx.setTransform(...transforms[1]);
-            if ((orientation || 1) > 4) {
+            if ((this.orientation || 1) > 4) {
                 [offset_x, offset_y] = [offset_y, offset_x];
             }
         });
@@ -101,12 +101,24 @@ class ImageLoader extends React.Component {
                     const ctx = canvas.getContext('2d');
                     const radian = face.angle.roll * Math.PI / 180.0;
                     const s = 96 / Math.max(Math.abs(face.bounding[0].x - face.bounding[2].x), Math.abs(face.bounding[0].y - face.bounding[2].y));
+                    const transforms = {
+                        1: [1, 0, 0, 1, 0, 0],
+                        2: [-1, 0, 0, 1, w, 0],
+                        3: [-1, 0, 0, -1, w, h],
+                        4: [1, 0, 0, -1, 0, h],
+                        5: [0, 1, 1, 0, 0, 0],
+                        6: [0, 1, -1, 0, h, 0],
+                        7: [0, -1, -1, 0, h, w],
+                        8: [0, -1, 1, 0, 0, w]
+                    };
                     canvas.width = canvas.height = 112;
                     ctx.translate(56, 56);
                     ctx.scale(s, s);
                     ctx.rotate(-radian);
                     ctx.translate(-(face.bounding[0].x + face.bounding[2].x) / 2.0, -(face.bounding[0].y + face.bounding[2].y) / 2.0);
+                    ctx.transform(...transforms[this.orientation || 1]);
                     ctx.drawImage(image, 0, 0);
+                    ctx.transform(...transforms[1]);
                     return canvas.toDataURL();
                 };
                 const faces = [];
